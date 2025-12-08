@@ -9,9 +9,9 @@
 ---
 
 <a name="english"></a>
-## 🇬🇧 English
+## English
 
-**Control Gemini Key** is a lightweight microservice designed to manage and load-balance Google Gemini API keys. It solves the common problem of hitting rate limits (HTTP 429) by intelligently rotating through a pool of keys and tracking their usage persistence.
+**Control Gemini Key** is designed specifically to manage and load-balance Google Gemini API keys. It solves the issue of the daily 20-request limit (HTTP 429) by intelligently rotating through a pool of keys and tracking their usage, ensuring that each key is used at most 20 times per day to keep your application running stably.
 
 This microservice automates the management of available Google Gemini API keys, intelligently rotating them to handle rate limits and ensure continuous operation.
 
@@ -81,7 +81,7 @@ except Exception as e:
 ---
 
 <a name="traditional-chinese"></a>
-## 🇹🇼 繁體中文 (Traditional Chinese)
+## 繁體中文 (Traditional Chinese)
 
 **Control Gemini Key** 是一個專門設計用於管理和負載平衡 Google Gemini API 金鑰。它解決了一天20次的 (HTTP 429) 問題，透過智慧循環金鑰池並追蹤維護使用量，確保每個key每天最多被使用 20 次，您的應用程式穩定運行。
 
@@ -105,17 +105,17 @@ except Exception as e:
     pip install python-dotenv
     ```
 
-3.  **設定金鑰**：在專案根目錄下建立 `key.txt` 檔案，並填入您的 API 金鑰（每行一個）。
+3.  **設定金鑰**：在專案根目錄下建立 `key.txt` 檔案，並填入您的 API 金鑰（每行一個，可以空行）。
     ```text
     AIzaSyD...
     AIzaSyE...
     ```
-    *或者，您也可以在 `.env` 檔案中設定 `GEMINI_API_KEY` (以逗號分隔)。*
+    *或者也可以在 `.env` 檔案中設定 `GEMINI_API_KEY` (以逗號分隔)。*
 
 ### 使用方法
 
 #### 1. 啟動伺服器 (Key Server)
-執行輕量級 HTTP 伺服器。預設監聽 `5000` 端口。
+預設監聽 `5000` 端口。
 
 ```bash
 python key_server.py
@@ -145,11 +145,8 @@ except Exception as e:
     print(f"發生錯誤: {e}")
 ```
 
-### API 參考
+### API 例子
 
 *   **`GET /get_key`**：回傳 `{"key": "..."}`，提供當前最佳可用金鑰。若無可用金鑰則回傳 503。
 *   **`POST /report_usage`**：接收 `{"key": "..."}`，將指定金鑰的使用計數加一。
 
----
-**Note**: Please insure `key.txt` and `.env` are added to your `.gitignore` to prevent leaking sensitive credentials.
-**注意**：請確保 `key.txt` 與 `.env` 已加入您的 `.gitignore` 檔案，以防止機密金鑰外洩。
