@@ -72,8 +72,7 @@ def run(server_class=HTTPServer, handler_class=KeyRequestHandler, port=5000):
     reloader_thread = threading.Thread(target=scheduled_key_reload, args=(1800,), daemon=True)
     reloader_thread.start()
     
-    print(f'Starting Key Server on port {port}...
-')
+    print(f'Starting Key Server on port {port}...')
     print(f'API Endpoints:')
     print(f'  GET  http://localhost:{port}/get_key')
     print(f'  POST http://localhost:{port}/report_usage {{"key": "..."}}')
