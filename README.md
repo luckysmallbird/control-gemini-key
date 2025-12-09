@@ -83,9 +83,7 @@ except Exception as e:
 <a name="traditional-chinese"></a>
 ## 繁體中文 (Traditional Chinese)
 
-**Control Gemini Key** 是一個專門設計用於管理和負載平衡 Google Gemini API 金鑰。它解決了一天20次的 (HTTP 429) 問題，透過智慧循環金鑰池並追蹤維護使用量，確保每個key每天最多被使用 20 次，您的應用程式穩定運行。
-
-此微服務旨在自動化管理可用的 Google Gemini API 金鑰，透過智慧輪替以應對速率限制，確保服務不中斷。
+**Control Gemini Key** 是一個設計用於管理 Google Gemini API 金鑰的專案。它可以透過自動更換 key 避免一天20次的 (HTTP 429) 問題，透過循環金鑰池並追蹤維護使用量，確保每個key每天最多被使用 20 次。
 
 ### 系統需求
 
@@ -150,3 +148,5 @@ except Exception as e:
 *   **`GET /get_key`**：回傳 `{"key": "..."}`，提供當前最佳可用金鑰。若無可用金鑰則回傳 503。
 *   **`POST /report_usage`**：接收 `{"key": "..."}`，將指定金鑰的使用計數加一。
 
+### 成功運行
+會生成 `key_usage.json`，裡面統計了每個key最後一次使用的時間以及次數，server 會在適當的情況下歸零
