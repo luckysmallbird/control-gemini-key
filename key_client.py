@@ -32,3 +32,18 @@ class KeyClient:
                     print(f"[KeyClient] Warning: Report usage returned status {response.status}")
         except Exception as e:
             print(f"[KeyClient] Failed to report key usage: {e}")
+
+    def report_invalid_key(self, key):
+        """Report an invalid key (e.g., 400 error) to the server to be removed."""
+        url = f"{self.host}/report_invalid"
+        data = json.dumps({"key": key}).encode('utf-8')
+        req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'}, method='POST')
+        
+        try:
+            with urllib.request.urlopen(req) as response:
+                if response.status != 200:
+                    print(f"[KeyClient] Warning: Report invalid key returned status {response.status}")
+                else:
+                    print(f"[KeyClient] Successfully reported invalid key: ...{key[-4:] if len(key)>4 else key}")
+        except Exception as e:
+            print(f"[KeyClient] Failed to report invalid key: {e}")

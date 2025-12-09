@@ -51,6 +51,29 @@ class KeyRequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
+        
+        elif self.path == '/report_invalid':
+            try:
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data)
+                key = data.get("key")
+                
+                if key:
+                    key_mgr.mark_key_invalid(key)
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "ok"}).encode())
+                else:
+                    self.send_response(400)
+                    self.end_headers()
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+
         else:
             self.send_response(404)
             self.end_headers()
@@ -75,7 +98,8 @@ def run(server_class=HTTPServer, handler_class=KeyRequestHandler, port=5000):
     print(f'Starting Key Server on port {port}...')
     print(f'API Endpoints:')
     print(f'  GET  http://localhost:{port}/get_key')
-    print(f'  POST http://localhost:{port}/report_usage {{"key": "..."}}')
+    print(f'  POST http://localhost:{port}/report_usage {{ "key": "..."}}')
+    print(f'  POST http://localhost:{port}/report_invalid {{ "key": "..."}}')
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

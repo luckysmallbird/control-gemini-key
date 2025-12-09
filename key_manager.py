@@ -8,8 +8,11 @@ class KeyManager:
     def __init__(self, key_string=None, usage_file="key_usage.json", max_requests_per_day=19):
         self.base_dir = Path(__file__).parent
         self.usage_file_path = self.base_dir / usage_file
+        self.error_key_file_path = self.base_dir / "error_key.txt"
+        self.key_file_path = self.base_dir / "key.txt"
         self.max_requests = max_requests_per_day
         self.keys = []
+        self.invalid_keys = set()
         
         if key_string:
             self.keys = [k.strip() for k in key_string.split(',') if k.strip()]
@@ -32,20 +35,19 @@ class KeyManager:
         except Exception as e:
             print(f"[KeyManager] Failed to read .env: {e}")
 
-        key_txt_path = self.base_dir / "key.txt"
-        if key_txt_path.exists():
+        if self.key_file_path.exists():
             try:
-                with open(key_txt_path, 'r', encoding='utf-8') as f:
+                with open(self.key_file_path, 'r', encoding='utf-8') as f:
                     for line in f:
                         k = line.strip()
-                        if k:
+                        if k and k not in self.invalid_keys:
                             new_keys.append(k)
             except Exception as e:
                 print(f"[KeyManager] Failed to read key.txt: {e}")
         
         added_count = 0
         for k in new_keys:
-            if k not in self.keys:
+            if k not in self.keys and k not in self.invalid_keys:
                 self.keys.append(k)
                 added_count += 1
         
@@ -75,6 +77,9 @@ class KeyManager:
             valid_keys = []
             
             for key in self.keys:
+                if key in self.invalid_keys:
+                    continue
+
                 if key not in self.usage_data:
                     self.usage_data[key] = {
                         "count": 0,
@@ -115,3 +120,35 @@ class KeyManager:
             self._save_usage_data()
         else:
             print(f"[KeyManager] Warning: Attempting to update an unknown Key ...{key[-4:]}")
+
+    def mark_key_invalid(self, key):
+        print(f"[KeyManager] Marking key as invalid: ...{key[-4:] if len(key)>4 else key}")
+        
+        self.invalid_keys.add(key)
+        
+        if key in self.keys:
+            self.keys.remove(key)
+        
+        if key in self.usage_data:
+            del self.usage_data[key]
+            self._save_usage_data()
+        
+        try:
+            with open(self.error_key_file_path, 'a', encoding='utf-8') as f:
+                f.write(key + '\n')
+        except Exception as e:
+            print(f"[KeyManager] Failed to write to error_key.txt: {e}")
+
+        if self.key_file_path.exists():
+            try:
+                with open(self.key_file_path, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                
+                new_lines = [line for line in lines if line.strip() != key]
+                
+                if len(new_lines) < len(lines):
+                    with open(self.key_file_path, 'w', encoding='utf-8') as f:
+                        f.writelines(new_lines)
+                    print(f"[KeyManager] Removed invalid key from key.txt")
+            except Exception as e:
+                print(f"[KeyManager] Failed to remove key from key.txt: {e}")
